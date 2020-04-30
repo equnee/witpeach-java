@@ -1,0 +1,134 @@
+---
+name: 单例模式
+menu: 设计模式
+---
+
+# 单例模式_Singleton
+
+> 一个类只能创建一个对象，有效减少内存占用空间
+
+**思路：**
+
+1. 设计一个系统 ——> 百度  搜索引擎
+
+```java
+public class Baidu{
+	public void 搜索(String keyword){
+	}
+}
+	//创建一个baidu对象 new
+	//调用搜索方法 做事情
+	//同一时间有很多很多很多很多很多人在使用这个系统
+	对象 ——> 只创建一个 （堆内存种只开辟一个空间
+	调用一次方法 ——> 临时执行一次，方法执行空间就回收了
+```
+
+
+
+## 思路分析
+
+### 1. 场景
+
+设计一个`SingleTon`类，使其只能创建一个对象。
+
+### 2. 思路 
+
+1. **==私有==的构造方法**
+
+   - 私有：为了不让别人创建
+
+2. **==私有==的==静态==的当前类对象作为属性**
+
+   - 私有：保证属性安全
+   - 静态：保证属性只加载一次，不出现<u>栈内存溢出问题</u>*（在堆内反复根据类模板套娃创建，无法创建完毕*）
+
+3. **==公有==的==静态方法==返回当前类对象**
+
+   - 共有的方法返回值：给出方法，而前两个都是私有的，则使用公有方法以被调用
+
+   - 静态方法：方法在调用之前没有对象，调用方法时不创建对象就能调用——只能用静态方法，通过类名就能调用。
+
+![image-20200418003759582](C:/Users/31074/Documents/%23 typoras/[ programming ]/Java/渡一/设计模式/assets/image-20200418003759582.png)
+
+
+
+### 3. 代码
+
+#### ① 私有的构造方法
+
+```java
+private SingleTon(){}
+```
+
+#### ② 私有的静态的当前类对象
+
+```java
+private static SingleTon single = new SingleTon();
+```
+
+#### ③ 共有的静态方法返回当前类对象
+
+```java
+public static SingleTon getSingleTon(){
+    return single;
+}
+```
+
+#### ④ ( 验证 )
+
+```java
+package singleton;
+	public class TestMain {
+        public static void main(String[]args){
+            SingleTon s1 = SingleTon.getSingleTon();
+            SingleTon s2 = SingleTon.getSingleTon(); //s1和s2两个变量，指向同一个对象空间
+            //验证
+            System.out.println(s1==s2); //比较地址
+            System.out.println(s1.equals(s2)); //true Object类继承过来的，默认也比较地址
+            System.out.println(s1);
+            System.out.println(s2);//类全名@hashCode ——> 16进制的整数
+        }
+}
+```
+
+
+
+---
+
+## 实现方法
+
+指的是对象的加载
+
+### 1. 饿汉式（立即加载）
+
+- 对象启动时就加载 （`static`）
+- 不会产生对象没有就拿来使用的问题（空指针异常）
+- 启动项目加载的对象过多，有些还还没有使用，产生服务器承载压力的问题
+
+### 2. 懒汉式（延迟加载）
+
+- 对象用到时才加载
+
+- 可能会由于没有操作好，导致异常（需要很严谨）
+
+- 启动项目时只有需要的才加载，不需要的还没有创建，不会浪费空间
+
+  ```java
+  public class SingleTon{
+      private SingleTon(){}
+      private static SingleTon single;//尚未加载single对象属性
+      public static SinglTon getSingleTon(){
+          if(single==null){ // ← 严谨
+              single = new SingleTon();//使用到对象时才加载
+          }
+          return single;
+      }
+  }
+  ```
+
+  
+
+### 3. 生命周期托管（单例对象别人帮我处理）
+
+- 对象加载过程交给别人
+
